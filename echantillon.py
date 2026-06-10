@@ -168,12 +168,21 @@ def main():
     # GPS : récupération et recherche immédiate (streamlit-geolocation)
     # ===========================================================
     st.subheader("📍 Obtenir ma position GPS")
+
     location = streamlit_geolocation()
 
-    if location:
-        lat = location.get("latitude")
-        lon = location.get("longitude")
-        
+    if location is not None:
+        # Récupération robuste selon le type retourné
+        if isinstance(location, dict):
+            lat = location.get("latitude")
+            lon = location.get("longitude")
+        elif hasattr(location, 'latitude'):  # objet avec attributs
+            lat = location.latitude
+            lon = location.longitude
+        else:
+            lat = lon = None
+            st.warning("Format de géolocalisation non reconnu")
+
         if lat is not None and lon is not None:
             st.success(f"Position GPS détectée : {lat:.6f}, {lon:.6f}")
             st.session_state.gps_lat = lat
